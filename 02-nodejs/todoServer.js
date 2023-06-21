@@ -40,10 +40,110 @@
   Testing the server - run `npm run test-todoServer` command in terminal
  */
 const express = require('express');
+const port=3000
 const bodyParser = require('body-parser');
 
 const app = express();
 
 app.use(bodyParser.json());
 
+let data=[{
+  id:1,
+  title:"gyming everyday",
+  discription:"Some benefits of physical activity on brain health [PDF-14].",
+  completed:false
+
+},{
+  id:2,
+  title:"play",
+  discription:"good cardio if we play reguraly",
+  completed:false
+}]
+
+
+// const fetchData=(req,res)=>{
+//   const itemId=req.params.id
+//   console.log(itemId)
+//   if (!itemId){
+//     // const answer=data.filter(item=>item.id===itemId)
+//     res.status(400)
+//   }
+//   else{
+//   res.status(201).send(answer);
+//   }
+// }
+
+app.get(`/todos`,(req,res)=>{
+  res.status(200).send(data)
+});
+
+app.get(`/todos/:id`,(req,res)=>{
+  itemid=data.find(t=>(t.id===parseInt(req.params.id)))
+  if(!itemid){
+    res.status(404).send()
+  }
+  else{
+    res.json(itemid)
+  }
+
+})
+app.get('/todos/:id', (req, res) => {
+  const todo = data.find(t => t.id === parseInt(req.params.id));
+  if (!todo) {
+    res.status(404).send();
+  } else {
+    res.json(todo);
+  }
+});
+
+app.post('/todos/',(req,res)=>{
+  let n=data.length
+  const newTodo={
+    id:n+1,
+    title:req.body.title,
+    discription:req.body.discription,
+    completed:req.body.completed
+  }
+  data=[...data,newTodo]
+
+  res.status(200).send("sucessfully added Data")
+
+})
+
+app.put('/todos/:id',(req,res)=>{
+  const todoId=data.findIndex(t=>parseInt(req.params.id)===t.id)
+  const updatedTodo = req.body;
+  // const todoId = data.findIndex(t => t.id === parseInt(req.params.id));
+  if(todoId===-1){
+    res.status(404).send()
+  }
+  else{
+    // data[todoId].title=req.body?.title
+    // data[todoId].discription=req.body?.discription
+    // data[todoId].completed=req.body?.completed
+    data[todoId] = { ...data[todoId], ...updatedTodo };
+    res.status(200).json(data)
+    
+  }
+})
+
+app.delete('/todos/:id',(req,res)=>{
+todoId=data.findIndex(t=>t.id===parseInt(req.params.id))
+if (todoId===-1){
+  res.status(404).send()
+}
+else{
+  delete data.splice(todoId,1)
+  res.status(200).json(data)
+}
+})
+
+
+app.use((req,res,next)=>{
+  res.status(400).send()
+})
+// app.use((req, res, next) => {
+//   res.status(404).send();
+// });
+app.listen(port)
 module.exports = app;
